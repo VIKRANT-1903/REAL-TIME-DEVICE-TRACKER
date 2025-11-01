@@ -11,12 +11,16 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 io.on("connection", (socket) => {
-    console.log("New WebSocket connection");
+  console.log("A user connected:", socket.id);
 
-    socket.on("send-location", (data) => {
-        console.log("Location received:", data); // Log received location data
-        io.emit("receive-location", { id: socket.id, ...data });
-    });
+  socket.on("send-location", (data) => {
+    io.emit("receive-location", { id: socket.id, ...data });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+    io.emit("user-disconnected", socket.id); // Broadcast this ID to all other clients
+  });
 });
 
 app.get("/", (req, res) => {
